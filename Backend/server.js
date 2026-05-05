@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 
@@ -18,10 +19,22 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// Sincroniza tabelas com MySQL
+// Servir frontend em produção
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, '..', 'Frontend', 'dist');
+  app.use(express.static(frontendPath));
+  app.get('*', (req, res) => res.sendFile(path.join(frontendPath, 'index.html')));
+}
+
+// Sincroniza tabelas com o banco de dados
 sequelize.sync({ alter: true })
-  .then(() => console.log('✅ Tabelas sincronizadas com MySQL'))
+  .then(() => console.log('✅ Tabelas sincronizadas com o banco de dados'))
   .catch(err => console.error('❌ Erro ao sincronizar tabelas:', err));
 
-const PORT = 5000;
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'Erro interno do servidor' });
+});
+
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Servidor rodando na porta ${PORT}`));

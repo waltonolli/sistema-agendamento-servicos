@@ -5,29 +5,58 @@ function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [message, setMessage] = useState("");
+
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:5000/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert("Cadastro realizado com sucesso! Faça login.");
-    } else {
-      alert(data.error || "Erro no cadastro");
+
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setMessage('Preencha todos os campos para se cadastrar.');
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage('Cadastro realizado! Faça login para continuar.');
+        setName('');
+        setEmail('');
+        setPassword('');
+      } else {
+        setMessage(data.error || 'Erro no cadastro.');
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage('Falha ao conectar com o servidor.');
     }
   };
 
   return (
-    <form onSubmit={handleRegister}>
+    <section className="card auth-card">
       <h2>Cadastro</h2>
-      <input type="text" placeholder="Nome" onChange={(e) => setName(e.target.value)} />
-      <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-      <input type="password" placeholder="Senha" onChange={(e) => setPassword(e.target.value)} />
-      <button type="submit">Cadastrar</button>
-    </form>
+      <form onSubmit={handleRegister} className="auth-form">
+        <label>
+          Nome
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" />
+        </label>
+        <label>
+          Email
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
+        </label>
+        <label>
+          Senha
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+        </label>
+        <button className="secondary-button" type="submit">Cadastrar</button>
+        {message && <p className="form-message">{message}</p>}
+      </form>
+    </section>
   );
 }
 
