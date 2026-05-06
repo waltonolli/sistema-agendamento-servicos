@@ -1,15 +1,18 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../Models/User');
+const { registerSchema, loginSchema } = require('../validators/authValidator');
 
-const jwtSecret = process.env.JWT_SECRET || 'supersecret_senha';
+const jwtSecret = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: 'Nome, email e senha são obrigatórios.' });
+  // Validar com Joi
+  const { error, value } = registerSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
   }
+
+  const { name, email, password } = value;
 
   try {
     const existingUser = await User.findOne({ where: { email } });
@@ -30,10 +33,13 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email e senha são obrigatórios.' });
+  // Validar com Joi
+  const { error, value } = loginSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
   }
+
+  const { email, password } = value;
 
   try {
     const user = await User.findOne({ where: { email } });

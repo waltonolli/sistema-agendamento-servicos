@@ -1,9 +1,17 @@
+require('dotenv').config();
+
+// Validar variáveis obrigatórias
+if (!process.env.JWT_SECRET) {
+  console.error('❌ Erro: JWT_SECRET não definido em .env');
+  process.exit(1);
+}
+
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
 
 // Importa rotas
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./Routes/auth');
 const bookingRoutes = require('./Routes/booking');
 
 // Importa Sequelize e modelos

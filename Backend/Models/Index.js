@@ -2,7 +2,6 @@ const { Sequelize } = require('sequelize');
 const path = require('path');
 
 const dbDialect = process.env.DB_DIALECT || 'sqlite';
-const dbStorage = process.env.DB_STORAGE || path.join(__dirname, '..', 'data', 'agenda.sqlite');
 
 const sequelizeOptions = {
   dialect: dbDialect,
@@ -10,18 +9,19 @@ const sequelizeOptions = {
 };
 
 if (dbDialect === 'sqlite') {
-  sequelizeOptions.storage = dbStorage;
+  sequelizeOptions.storage = process.env.DB_STORAGE || 
+    path.join(__dirname, '..', 'data', 'agenda.sqlite');
 } else {
-  sequelizeOptions.host = process.env.DB_HOST || 'localhost';
-  sequelizeOptions.port = process.env.DB_PORT || 3306;
-  sequelizeOptions.username = process.env.DB_USER || 'root';
-  sequelizeOptions.password = process.env.DB_PASS || 'senha';
+  sequelizeOptions.host = process.env.DB_HOST;
+  sequelizeOptions.port = process.env.DB_PORT;
+  sequelizeOptions.username = process.env.DB_USER;
+  sequelizeOptions.password = process.env.DB_PASS;
 }
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'agenda_db',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASS || 'senha',
+  process.env.DB_USER,
+  process.env.DB_PASS,
   sequelizeOptions
 );
 

@@ -1,12 +1,15 @@
 const Booking = require('../Models/Booking');
 const { Op } = require('sequelize');
+const { createBookingSchema } = require('../validators/bookingValidator');
 
 exports.createBooking = async (req, res) => {
-  const { service, date, time } = req.body;
-
-  if (!service || !date || !time) {
-    return res.status(400).json({ error: 'Serviço, data e hora são obrigatórios.' });
+  // Validar com Joi
+  const { error, value } = createBookingSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
   }
+
+  const { service, date, time } = value;
 
   try {
     const booking = await Booking.create({ userId: req.user.id, service, date, time });
@@ -81,11 +84,13 @@ exports.getBookingById = async (req, res) => {
 };
 
 exports.updateBooking = async (req, res) => {
-  const { service, date, time } = req.body;
-
-  if (!service || !date || !time) {
-    return res.status(400).json({ error: 'Serviço, data e hora são obrigatórios.' });
+  // Validar com Joi
+  const { error, value } = createBookingSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
   }
+
+  const { service, date, time } = value;
 
   try {
     const booking = await Booking.findOne({ where: { id: req.params.id, userId: req.user.id } });

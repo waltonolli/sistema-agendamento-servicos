@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 
 function BookingForm({ token, editBooking, clearEdit, onSaved }) {
   const [service, setService] = useState("");
@@ -36,8 +37,8 @@ function BookingForm({ token, editBooking, clearEdit, onSaved }) {
 
     const method = editBooking ? 'PUT' : 'POST';
     const url = editBooking
-      ? `http://localhost:5000/api/bookings/${editBooking.id}`
-      : 'http://localhost:5000/api/bookings';
+      ? API_ENDPOINTS.BOOKINGS_UPDATE(editBooking.id)
+      : API_ENDPOINTS.BOOKINGS_CREATE;
 
     try {
       const res = await fetch(url, {

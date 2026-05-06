@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 
 function BookingList({ token, onEdit, refreshTrigger }) {
   const [bookings, setBookings] = useState([]);
@@ -18,7 +19,7 @@ function BookingList({ token, onEdit, refreshTrigger }) {
       if (startDateFilter) params.append('startDate', startDateFilter);
       if (endDateFilter) params.append('endDate', endDateFilter);
 
-      const res = await fetch(`http://localhost:5000/api/bookings?${params.toString()}`, {
+      const res = await fetch(`${API_ENDPOINTS.BOOKINGS_GET}?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -57,7 +58,7 @@ function BookingList({ token, onEdit, refreshTrigger }) {
 
   const handleCancel = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/bookings/${id}`, {
+      const res = await fetch(API_ENDPOINTS.BOOKINGS_DELETE(id), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

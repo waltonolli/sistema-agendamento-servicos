@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "../config/api";
 
 function BookingStats({ token, refreshTrigger }) {
   const [stats, setStats] = useState(null);
@@ -11,7 +12,7 @@ function BookingStats({ token, refreshTrigger }) {
       setMessage("");
 
       try {
-        const res = await fetch("http://localhost:5000/api/bookings/summary", {
+        const res = await fetch(API_ENDPOINTS.BOOKINGS_SUMMARY, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
