@@ -13,6 +13,9 @@ const registerSchema = Joi.object({
   password: Joi.string().min(6).required().messages({
     'string.min': 'Senha deve ter no mínimo 6 caracteres',
     'string.empty': 'Senha é obrigatória'
+  }),
+  role: Joi.string().valid('cliente', 'prestador').default('cliente').messages({
+    'any.only': 'O papel deve ser cliente ou prestador'
   })
 });
 

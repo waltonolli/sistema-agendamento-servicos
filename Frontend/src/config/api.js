@@ -6,7 +6,9 @@ export const API_ENDPOINTS = {
   BOOKINGS_CREATE: `${API_URL}/api/bookings`,
   BOOKINGS_GET: `${API_URL}/api/bookings`,
   BOOKINGS_SUMMARY: `${API_URL}/api/bookings/summary`,
+  BOOKINGS_PROVIDERS: `${API_URL}/api/bookings/providers`,
   BOOKINGS_UPDATE: (id) => `${API_URL}/api/bookings/${id}`,
+  BOOKINGS_STATUS: (id) => `${API_URL}/api/bookings/${id}/status`,
   BOOKINGS_DELETE: (id) => `${API_URL}/api/bookings/${id}`,
 };
 

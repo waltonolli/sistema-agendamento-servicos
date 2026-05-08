@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { API_ENDPOINTS } from "../config/api";
 
-function BookingForm({ token, editBooking, clearEdit, onSaved }) {
+function BookingForm({ token, userRole, editBooking, clearEdit, onSaved }) {
   const [service, setService] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [providerId, setProviderId] = useState("");
+  const [providers, setProviders] = useState([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -12,12 +14,36 @@ function BookingForm({ token, editBooking, clearEdit, onSaved }) {
       setService(editBooking.service);
       setDate(editBooking.date);
       setTime(editBooking.time);
+      setProviderId(editBooking.providerId || "");
     } else {
       setService("");
       setDate("");
       setTime("");
+      setProviderId("");
     }
   }, [editBooking]);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      if (userRole !== 'cliente') return;
+      try {
+        const res = await fetch(API_ENDPOINTS.BOOKINGS_PROVIDERS, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setProviders(data);
+          if (!providerId && data.length > 0) setProviderId(data[0].id);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchProviders();
+  }, [userRole, token, providerId]);
 
   const resetForm = () => {
     setService("");
@@ -30,7 +56,7 @@ function BookingForm({ token, editBooking, clearEdit, onSaved }) {
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    if (!service.trim() || !date || !time) {
+    if (!service.trim() || !date || !time || (!editBooking && !providerId)) {
       setMessage('Preencha todos os campos antes de enviar.');
       return;
     }
@@ -40,6 +66,8 @@ function BookingForm({ token, editBooking, clearEdit, onSaved }) {
       ? API_ENDPOINTS.BOOKINGS_UPDATE(editBooking.id)
       : API_ENDPOINTS.BOOKINGS_CREATE;
 
+    const payload = { service, date, time, providerId };
+
     try {
       const res = await fetch(url, {
         method,
@@ -47,7 +75,7 @@ function BookingForm({ token, editBooking, clearEdit, onSaved }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ service, date, time }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
 
@@ -65,10 +93,30 @@ function BookingForm({ token, editBooking, clearEdit, onSaved }) {
     }
   };
 
+  if (userRole === 'prestador') {
+    return (
+      <section className="card form-card">
+        <h2>Agenda do Prestador</h2>
+        <p>Você é prestador de serviços. Aqui você visualiza e aprova solicitações no seu calendário.</p>
+      </section>
+    );
+  }
+
   return (
     <section className="card form-card">
       <h2>{editBooking ? 'Editar Agendamento' : 'Novo Agendamento'}</h2>
       <form onSubmit={handleBooking} className="booking-form">
+        <label>
+          Prestador
+          <select value={providerId} onChange={(e) => setProviderId(e.target.value)}>
+            <option value="">Selecione um prestador</option>
+            {providers.map((provider) => (
+              <option key={provider.id} value={provider.id}>
+                {provider.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <label>
           Serviço
           <input

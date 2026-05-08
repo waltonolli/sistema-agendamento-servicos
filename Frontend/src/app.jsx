@@ -7,17 +7,25 @@ import BookingStats from "./components/bookingStats";
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('authToken'));
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('authUser');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const handleToken = (newToken) => {
+  const handleAuth = ({ token: newToken, user: userData }) => {
     localStorage.setItem('authToken', newToken);
+    localStorage.setItem('authUser', JSON.stringify(userData));
     setToken(newToken);
+    setUser(userData);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
     setToken(null);
+    setUser(null);
     setSelectedBooking(null);
   };
 
@@ -38,22 +46,31 @@ function App() {
 
       {!token ? (
         <main className="auth-layout">
-          <LoginForm setToken={handleToken} />
+          <LoginForm onLogin={handleAuth} />
           <RegisterForm />
         </main>
       ) : (
         <main className="dashboard-layout">
           <div className="dashboard-left">
             <BookingStats token={token} refreshTrigger={refreshTrigger} />
-            <BookingForm
-              token={token}
-              editBooking={selectedBooking}
-              clearEdit={() => setSelectedBooking(null)}
-              onSaved={handleSaved}
-            />
+            {user?.role === 'cliente' ? (
+              <BookingForm
+                token={token}
+                userRole={user?.role}
+                editBooking={selectedBooking}
+                clearEdit={() => setSelectedBooking(null)}
+                onSaved={handleSaved}
+              />
+            ) : (
+              <section className="card form-card">
+                <h2>Agenda do Prestador</h2>
+                <p>Como prestador de serviço, você pode ver solicitações de reserva e aprová-las ou rejeitá-las.</p>
+              </section>
+            )}
           </div>
           <BookingList
             token={token}
+            userRole={user?.role}
             onEdit={setSelectedBooking}
             refreshTrigger={refreshTrigger}
           />

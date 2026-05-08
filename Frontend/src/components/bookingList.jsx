@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { API_ENDPOINTS } from "../config/api";
 
-function BookingList({ token, onEdit, refreshTrigger }) {
+function BookingList({ token, onEdit, refreshTrigger, userRole }) {
   const [bookings, setBookings] = useState([]);
   const [message, setMessage] = useState("");
   const [serviceFilter, setServiceFilter] = useState("");
@@ -77,6 +77,52 @@ function BookingList({ token, onEdit, refreshTrigger }) {
     }
   };
 
+  const handleApprove = async (id) => {
+    try {
+      const res = await fetch(API_ENDPOINTS.BOOKINGS_STATUS(id), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: 'aprovado' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMessage(data.error || 'Erro ao aprovar agendamento.');
+        return;
+      }
+      setMessage('Agendamento aprovado.');
+      fetchBookings();
+    } catch (error) {
+      console.error(error);
+      setMessage('Erro de conexão ao aprovar.');
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      const res = await fetch(API_ENDPOINTS.BOOKINGS_STATUS(id), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: 'rejeitado' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMessage(data.error || 'Erro ao rejeitar agendamento.');
+        return;
+      }
+      setMessage('Agendamento rejeitado.');
+      fetchBookings();
+    } catch (error) {
+      console.error(error);
+      setMessage('Erro de conexão ao rejeitar.');
+    }
+  };
+
   return (
     <section className="card list-card">
       <div className="list-header">
@@ -122,15 +168,35 @@ function BookingList({ token, onEdit, refreshTrigger }) {
               <article key={booking.id} className="booking-card">
                 <div className="booking-details">
                   <strong>{booking.service}</strong>
-                  <p>{booking.date} �s {booking.time}</p>
+                  <p>{booking.date} às {booking.time}</p>
+                  <p>Status: {booking.status}</p>
+                  {userRole === 'prestador' ? (
+                    <p>Cliente: {booking.client?.name || '—'}</p>
+                  ) : (
+                    <p>Prestador: {booking.provider?.name || '—'}</p>
+                  )}
                 </div>
                 <div className="booking-actions">
-                  <button className="secondary-button" onClick={() => onEdit(booking)}>
-                    Editar
-                  </button>
-                  <button className="danger-button" onClick={() => handleCancel(booking.id)}>
-                    Cancelar
-                  </button>
+                  {userRole !== 'prestador' && booking.status !== 'cancelado' && (
+                    <>
+                      <button className="secondary-button" onClick={() => onEdit(booking)}>
+                        Editar
+                      </button>
+                      <button className="danger-button" onClick={() => handleCancel(booking.id)}>
+                        Cancelar
+                      </button>
+                    </>
+                  )}
+                  {userRole === 'prestador' && booking.status === 'pendente' && (
+                    <>
+                      <button className="primary-button" onClick={() => handleApprove(booking.id)}>
+                        Aprovar
+                      </button>
+                      <button className="danger-button" onClick={() => handleReject(booking.id)}>
+                        Rejeitar
+                      </button>
+                    </>
+                  )}
                 </div>
               </article>
             ))

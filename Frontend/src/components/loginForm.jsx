@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
 
-function LoginForm({ setToken }) {
+function LoginForm({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -22,8 +22,8 @@ function LoginForm({ setToken }) {
       });
       const data = await res.json();
 
-      if (data.token) {
-        setToken(data.token);
+      if (data.token && data.user) {
+        onLogin({ token: data.token, user: data.user });
       } else {
         setMessage(data.error || 'Erro no login.');
       }

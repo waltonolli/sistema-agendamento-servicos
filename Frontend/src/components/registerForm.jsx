@@ -5,6 +5,7 @@ function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState('cliente');
 
   const [message, setMessage] = useState("");
 
@@ -20,7 +21,7 @@ function RegisterForm() {
       const res = await fetch(API_ENDPOINTS.AUTH_REGISTER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, role }),
       });
       const data = await res.json();
 
@@ -53,6 +54,13 @@ function RegisterForm() {
         <label>
           Senha
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+        </label>
+        <label>
+          Tipo de conta
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="cliente">Cliente</option>
+            <option value="prestador">Prestador de serviços</option>
+          </select>
         </label>
         <button className="secondary-button" type="submit">Cadastrar</button>
         {message && <p className="form-message">{message}</p>}

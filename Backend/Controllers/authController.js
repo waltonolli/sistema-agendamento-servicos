@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
     return res.status(400).json({ error: error.details[0].message });
   }
 
-  const { name, email, password } = value;
+  const { name, email, password, role } = value;
 
   try {
     const existingUser = await User.findOne({ where: { email } });
@@ -21,10 +21,10 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({ name, email, password: hashedPassword, role });
     res.status(201).json({
       message: 'Usuário registrado com sucesso!',
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error(error);
@@ -48,10 +48,23 @@ exports.login = async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(401).json({ error: 'Senha inválida' });
 
-    const token = jwt.sign({ id: user.id, name: user.name }, jwtSecret, { expiresIn: '1h' });
-    res.json({ message: 'Login realizado com sucesso!', token, user: { id: user.id, name: user.name, email: user.email } });
+    const token = jwt.sign({ id: user.id, name: user.name, role: user.role }, jwtSecret, { expiresIn: '1h' });
+    res.json({ message: 'Login realizado com sucesso!', token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro no login' });
+  }
+};
+
+exports.getProviders = async (req, res) => {
+  try {
+    const providers = await User.findAll({
+      where: { role: 'prestador' },
+      attributes: ['id', 'name', 'email']
+    });
+    res.json(providers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar prestadores de serviço' });
   }
 };

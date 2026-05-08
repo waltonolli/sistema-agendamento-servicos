@@ -44,6 +44,12 @@ Status: ⚠️  PRECISA DE MELHORIAS CRÍTICAS
 [❌] Prop drilling no React (contexto ausente)
 [❌] Inconsistência de nomenclatura de pastas
 ```
+
+### 🔄 Atualização funcional recente
+- Implementado suporte a dois papéis: `cliente` e `prestador`.
+- Cliente pode escolher serviço e prestador no agendamento.
+- Prestador tem seu próprio calendário e aprova ou rejeita solicitações.
+- Agendamentos agora seguem status: `pendente`, `aprovado`, `rejeitado`, `cancelado`.
 **Impacto:** Qualidade de código reduzida
 
 ### 🟢 BAIXOS (Futuro)
